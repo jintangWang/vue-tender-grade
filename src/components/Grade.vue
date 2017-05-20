@@ -68,26 +68,25 @@
           isValid: '',
           score: '',
           ranking: ''
-        },
-        testData: [
-          4501.5607,4681.3000,4498.5250,5431.3783,5378.0000,4522.5000,5399.9039
-        ]
+        }
       }
     },
     created() {
       for (let i = 0; i < 7; i++){
-        this.companys.push(this.company);
+        this.companys.push(Object.assign({},this.company));
       }
     },
     methods: {
       addNew() {
-        this.companys.push(this.company);
+        this.companys.push(Object.assign({},this.company));
       },
       addTestData() {
+        let testData = [
+          4501.5607,4681.3000,4498.5250,5431.3783,5378.0000,4522.5000,5399.9039
+        ];
         this.tendereeTarget = 4638.0000;
         this.companys.forEach((item, index) => {
-          item.tenderOffer = this.testData[index];
-          console.log(this.testData[index])
+          item.tenderOffer = testData[index];
         });
       },
       valid() {
@@ -114,17 +113,17 @@
       },
       getSum(array) {
         let sum = 0;
-        array.foreach(function (item) {
+        array.forEach(function (item) {
           sum += item.tenderOffer - 0;
         });
         return sum;
       },
       calcResult() {
         if(!this.valid) return;
-        let sum = getSum(this.companys);
+        let sum = this.getSum(this.companys);
         let l = this.companys.length;
         this.companys.forEach((item) => {
-          item.otherOfferAverage = Math.round(sum - item.tenderOffer)/(length - 1);
+          item.otherOfferAverage = Math.round((sum - item.tenderOffer)/(l - 1));
         })
       }
     }
