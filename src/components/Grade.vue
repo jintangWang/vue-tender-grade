@@ -16,6 +16,8 @@
           <el-option label="-2%" value="-2%"></el-option>
         </el-select>
       </span>
+      <span class="label">评标指标：</span>
+      <span class="">{{standardTarget}}</span>
       <span class="submitBt">
         <el-button type="warning" @click="addTestData">添加测试数据</el-button>
         <el-button type="warning" @click="addNew">新增公司</el-button>
@@ -45,7 +47,7 @@
           </el-col>
           <el-col :span="5">{{item.otherOfferAverage}}</el-col>
           <el-col :span="4">
-            <i :class="item.isValid ? 'el-icon-check right' : 'el-icon-close error'" v-if="item.isValid"></i>
+            <i :class="item.isValid ? 'el-icon-check right' : 'el-icon-close error'"></i>
           </el-col>
           <el-col :span="3">{{item.score}}</el-col>
           <el-col :span="2">{{item.ranking}}</el-col>
@@ -59,7 +61,8 @@
     data() {
       return {
         tendereeTarget: '',
-        floatPoint: '0.5%',
+        floatPoint: '1.25%',
+        standardTarget: '',
         companys: [],
         company: {
           name: '',
@@ -118,13 +121,55 @@
         });
         return sum;
       },
+      isValid(item) {
+        let flag = false;
+        let tenderOffer = item.tenderOffer || 0;
+        let otherOfferAverage = item.otherOfferAverage || 0;
+        if(tenderOffer <= this.tendereeTarget*1.05 && tenderOffer >= this.tendereeTarget*0.93){
+          flag = true;
+        }
+        if(tenderOffer <= otherOfferAverage*1.05 && tenderOffer >= otherOfferAverage*0.93){
+          flag = true;
+        }
+        return flag;
+      },
+      getStandardTarget() {
+        let validCompanys = this.companys.filter(function (com) {
+          return com.isValid;
+        });
+        let validLength = validCompanys.length;
+        let sum = this.getSum(validCompanys);
+        let average = 0;
+        let standardTarget = 0;
+        if(validLength > 3) {
+          let tenderArr = validCompanys.map(function (item) {
+            return item.tenderOffer - 0;
+          });
+          let max = Math.max(...tenderArr);
+          let min = Math.min(...tenderArr);
+          console.log('max:'+ max+';' + 'min:' +min);
+          average = (sum - max - min)/(validLength - 2);
+        }else if(validLength === 3){
+          average = sum/validLength;
+        }
+        standardTarget =  Math.round(average/(1 + Math.abs(Number.parseFloat(this.floatPoint)/100)));
+        return standardTarget;
+      },
       calcResult() {
-        if(!this.valid) return;
+        if(!this.valid()) return;
         let sum = this.getSum(this.companys);
         let l = this.companys.length;
         this.companys.forEach((item) => {
           item.otherOfferAverage = Math.round((sum - item.tenderOffer)/(l - 1));
-        })
+          item.isValid = this.isValid(item);
+        });
+        this.standardTarget = this.getStandardTarget();
+        this.companys.forEach(item => {
+          let ratio = item.tenderOffer/this.standardTarget-1;
+          if(ratio > 0){
+
+          }
+        });
       }
     }
   }
