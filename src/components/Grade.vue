@@ -165,9 +165,22 @@
         });
         this.standardTarget = this.getStandardTarget();
         this.companys.forEach(item => {
-          let ratio = item.tenderOffer/this.standardTarget-1;
-          if(ratio > 0){
-
+          if (item.isValid) {
+            let ratio = item.tenderOffer/this.standardTarget-1;
+            let subFlag = Math.ceil(Math.abs(ratio)/0.005);
+            item.score = 100 -0.5*subFlag;
+          }
+        });
+        let orderArr = this.companys.filter(function (item) {
+          return item.isValid;
+        }).map(function (item) {
+          return item.score;
+        }).sort(function (a, b) {
+          return a - b < 0;
+        });
+        this.companys.forEach(item => {
+          if (item.isValid) {
+            item.ranking = orderArr.indexOf(item.score) + 1;
           }
         });
       }
