@@ -7,7 +7,7 @@
       <span class="label">浮动点：</span>
       <span class="labelInput">
         <el-select v-model="floatPoint">
-          <el-option label="1%" value="%1"></el-option>
+          <el-option label="1%" value="1%"></el-option>
           <el-option label="0.5%" value="0.5%"></el-option>
           <el-option label="0%" value="0%"></el-option>
           <el-option label="-0.5%" value="-0.5%"></el-option>
@@ -37,7 +37,7 @@
       </el-row>
       </div>
       <div class="tableBody">
-        <el-row v-for="(item,index) in companys" :key="index">
+        <el-row v-for="(item,index) in companys" :key="index" :class="{'highlight': item.ranking == 1}">
           <el-col :span="2">{{index}}</el-col>
           <el-col :span="4">
             <el-input v-model="item.name" size="small"></el-input>
@@ -61,7 +61,7 @@
     data() {
       return {
         tendereeTarget: '',
-        floatPoint: '1.25%',
+        floatPoint: '0%',
         standardTarget: '',
         companys: [],
         company: {
@@ -84,10 +84,16 @@
         this.companys.push(Object.assign({},this.company));
       },
       addTestData() {
+//        let testData = [
+//          4501.5607,4681.3000,4498.5250,5431.3783,5378.0000,4522.5000,5399.9039
+//        ];
+//        this.floatPoint = '1.25%';
+//        this.tendereeTarget = 4638.0000;
         let testData = [
-          4501.5607,4681.3000,4498.5250,5431.3783,5378.0000,4522.5000,5399.9039
+          61230486.51, 60936722.70, 61746060.14, 61302518.19, 58253673.83, 58164669.29, 58103681.21
         ];
-        this.tendereeTarget = 4638.0000;
+        this.floatPoint = '1%';
+        this.tendereeTarget = 61500000;
         this.companys.forEach((item, index) => {
           item.tenderOffer = testData[index];
         });
@@ -165,9 +171,22 @@
         });
         this.standardTarget = this.getStandardTarget();
         this.companys.forEach(item => {
+          if (item.isValid) {
           let ratio = item.tenderOffer/this.standardTarget-1;
-          if(ratio > 0){
-
+            let subFlag = Math.ceil(Math.abs(ratio)/0.005);
+            item.score = 100 -0.5*subFlag;
+          }
+        });
+        let orderArr = this.companys.filter(function (item) {
+          return item.isValid;
+        }).map(function (item) {
+          return item.score;
+        }).sort(function (a, b) {
+          return a - b < 0;
+        });
+        this.companys.forEach(item => {
+          if (item.isValid) {
+            item.ranking = orderArr.indexOf(item.score) + 1;
           }
         });
       }
@@ -211,9 +230,18 @@
     .tableHead
       background: #20A0FF
       color: #fff
-    /*.tableBody*/
-      /*.el-row*/
-        /*&:nth-child(2n)*/
-          /*background #99A9BF*/
+    .el-row
+      box-sizing border-box
+      .el-input--small
+        display block
+        width: 90%
+        margin: 0 auto
+        input
+          margin-top 1px
+    .highlight
+      border 2px solid #ff4949
+      background: bisque
+      border-radius 5px
+
 
 </style>
