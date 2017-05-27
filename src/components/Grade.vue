@@ -27,18 +27,19 @@
     <div class="listTable">
       <div class="tableHead">
         <el-row>
-        <el-col :span="2">顺序</el-col>
+        <el-col :span="1">顺序</el-col>
         <el-col :span="4">投标单位</el-col>
         <el-col :span="4">投标报价</el-col>
         <el-col :span="5">大多数投标人报价平均值</el-col>
         <el-col :span="4">是否有效投标</el-col>
         <el-col :span="3">报价得分</el-col>
-        <el-col :span="2">名次</el-col>
+        <el-col :span="1">名次</el-col>
+        <el-col :span="2">操作</el-col>
       </el-row>
       </div>
       <div class="tableBody">
         <el-row v-for="(item,index) in companys" :key="index" :class="{'highlight': item.ranking == 1}">
-          <el-col :span="2">{{index}}</el-col>
+          <el-col :span="1">{{index + 1}}</el-col>
           <el-col :span="4">
             <el-input v-model="item.name" size="small"></el-input>
           </el-col>
@@ -50,7 +51,10 @@
             <i :class="item.isValid ? 'el-icon-check right' : 'el-icon-close error'"></i>
           </el-col>
           <el-col :span="3">{{item.score}}</el-col>
-          <el-col :span="2">{{item.ranking}}</el-col>
+          <el-col :span="1">{{item.ranking}}</el-col>
+          <el-col :span="2" style="position: relative;">
+            <el-button type="primary" icon="delete" @click="delRow(index)" size="small" class="delBt" title="删除"></el-button>
+          </el-col>
         </el-row>
       </div>
     </div>
@@ -97,6 +101,7 @@
         this.companys.forEach((item, index) => {
           item.tenderOffer = testData[index];
         });
+        this.calcResult();
       },
       valid() {
         let flag = true;
@@ -139,7 +144,7 @@
         }
         return flag;
       },
-      getStandardTarget() {
+      getStandardTarget() { // 评标指标
         let validCompanys = this.companys.filter(function (com) {
           return com.isValid;
         });
@@ -189,6 +194,10 @@
             item.ranking = orderArr.indexOf(item.score) + 1;
           }
         });
+      },
+      delRow(index) {
+        this.companys.splice(index, 1);
+        this.calcResult();
       }
     }
   }
@@ -232,6 +241,8 @@
       color: #fff
     .el-row
       box-sizing border-box
+      &:hover
+        background lighten(bisque, 30%)
       .el-input--small
         display block
         width: 90%
@@ -242,6 +253,10 @@
       border 2px solid #ff4949
       background: bisque
       border-radius 5px
+    .delBt
+      position absolute
+      top: 50%
+      transform translateY(-50%)
 
 
 </style>
